@@ -72,36 +72,40 @@ public class PathFindAlgorithm : MonoBehaviour
     /// </summary>
     public IEnumerator PathFindWithDepthFirst(Vector3 currentPos, Vector3 targetPos)
     {
-        isFinding = true;
-        depthStack.Clear();
-        depthStack.Push(currentPos);
-
-        while(depthStack.Count != 0)
+        ClearPath();
+        if (!isFinding)
         {
-            Vector3 curr = depthStack.Pop();
-            // 跳过的条件
-            if (curr.x >= length || curr.x <= -length ||
-            curr.z >= length || curr.z <= -length ||
-            obstacleList.ContainsKey(curr) || 
-            arriveMap.ContainsKey(curr))
+            isFinding = true;
+            depthStack.Clear();
+            depthStack.Push(currentPos);
+
+            while (depthStack.Count != 0)
             {
-                continue;
+                Vector3 curr = depthStack.Pop();
+                // 跳过的条件
+                if (curr.x >= length || curr.x <= -length ||
+                curr.z >= length || curr.z <= -length ||
+                obstacleList.ContainsKey(curr) ||
+                arriveMap.ContainsKey(curr))
+                {
+                    continue;
+                }
+                // 结束的条件
+                if (curr == targetPos)
+                {
+                    depthStack.Clear();
+                    break;
+                }
+                yield return new WaitForSeconds(initSeconds);
+                GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
+                arriveMap.Add(curr, 1);
+                for (int i = 0; i < offset.Length; i++)
+                {
+                    depthStack.Push(offset[i] + curr);
+                }
             }
-            // 结束的条件
-            if (curr == targetPos)
-            {
-                depthStack.Clear();
-                break;
-            }
-            yield return new WaitForSeconds(initSeconds);
-            GameObject.Instantiate(pathObj, curr, Quaternion.identity,pathParents.transform);
-            arriveMap.Add(curr, 1);
-            for (int i = 0; i < offset.Length; i++)
-            {
-                depthStack.Push(offset[i] + curr);
-            }
+            isFinding = false;
         }
-        isFinding = false;
     }
 
 
@@ -111,35 +115,39 @@ public class PathFindAlgorithm : MonoBehaviour
     /// </summary>
     public IEnumerator PathFindWithBreadthFirst(Vector3 currentPos, Vector3 targetPos)
     {
-        isFinding = true;
-        breadthQueue.Enqueue(currentPos);
-
-        while (breadthQueue.Count != 0)
+        ClearPath();
+        if (!isFinding)
         {
-            Vector3 curr = breadthQueue.Dequeue();
-            // 跳过的条件
-            if (curr.x >= length || curr.x <= -length ||
-            curr.z >= length || curr.z <= -length ||
-            obstacleList.ContainsKey(curr) ||
-            arriveMap.ContainsKey(curr))
+            isFinding = true;
+            breadthQueue.Enqueue(currentPos);
+
+            while (breadthQueue.Count != 0)
             {
-                continue;
+                Vector3 curr = breadthQueue.Dequeue();
+                // 跳过的条件
+                if (curr.x >= length || curr.x <= -length ||
+                curr.z >= length || curr.z <= -length ||
+                obstacleList.ContainsKey(curr) ||
+                arriveMap.ContainsKey(curr))
+                {
+                    continue;
+                }
+                // 结束的条件
+                if (curr == targetPos)
+                {
+                    breadthQueue.Clear();
+                    break;
+                }
+                yield return new WaitForSeconds(initSeconds);
+                GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
+                arriveMap.Add(curr, 1);
+                for (int i = 0; i < offset.Length; i++)
+                {
+                    breadthQueue.Enqueue(offset[i] + curr);
+                }
             }
-            // 结束的条件
-            if (curr == targetPos)
-            {
-                breadthQueue.Clear();
-                break;
-            }
-            yield return new WaitForSeconds(initSeconds);
-            GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
-            arriveMap.Add(curr, 1);
-            for (int i = 0; i < offset.Length; i++)
-            {
-                breadthQueue.Enqueue(offset[i] + curr);
-            }
+            isFinding = false;
         }
-        isFinding = false;
     }
 
 
@@ -149,36 +157,40 @@ public class PathFindAlgorithm : MonoBehaviour
     /// </summary>
     public IEnumerator PathFindWithGreedyBestFirst(Vector3 currentPos,Vector3 targetPos, DistacneClacWay way)
     {
-        isFinding = true;
-        greedyQueue.Enqueue(DisCalc(currentPos, targetPos,way), currentPos);
-        while (!greedyQueue.Empty())
+        ClearPath();
+        if (!isFinding)
         {
-            Vector3 curr = greedyQueue.Dequeue();
-            // 跳过的条件
-            if (curr.x >= length || curr.x <= -length ||
-            curr.z >= length || curr.z <= -length ||
-            obstacleList.ContainsKey(curr) ||
-            arriveMap.ContainsKey(curr))
+            isFinding = true;
+            greedyQueue.Enqueue(DisCalc(currentPos, targetPos, way), currentPos);
+            while (!greedyQueue.Empty())
             {
-                continue;
+                Vector3 curr = greedyQueue.Dequeue();
+                // 跳过的条件
+                if (curr.x >= length || curr.x <= -length ||
+                curr.z >= length || curr.z <= -length ||
+                obstacleList.ContainsKey(curr) ||
+                arriveMap.ContainsKey(curr))
+                {
+                    continue;
+                }
+                // 结束的条件
+                if (curr == targetPos)
+                {
+                    greedyQueue.Clear();
+                    break;
+                }
+                yield return new WaitForSeconds(initSeconds);
+                GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
+                arriveMap.Add(curr, 1);
+                for (int i = 0; i < offset.Length; i++)
+                {
+                    greedyQueue.Size();
+                    Vector3 t = curr + offset[i];
+                    greedyQueue.Enqueue(DisCalc(t, targetPos, way), t);
+                }
             }
-            // 结束的条件
-            if (curr == targetPos)
-            {
-                greedyQueue.Clear();
-                break;
-            }
-            yield return new WaitForSeconds(initSeconds);
-            GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
-            arriveMap.Add(curr, 1);
-            for (int i = 0; i < offset.Length; i++)
-            {
-                greedyQueue.Size();
-                Vector3 t = curr + offset[i];
-                greedyQueue.Enqueue(DisCalc(t, targetPos, way), t);
-            }
+            isFinding = false;
         }
-        isFinding = false;
     }
 
 
@@ -187,37 +199,41 @@ public class PathFindAlgorithm : MonoBehaviour
     /// </summary>
     public IEnumerator PathFindDijkstraFind(Vector3 currentPos, Vector3 targetPos)
     {
-        isFinding = true;
-        Vector3 beginPos = currentPos;
-        dijkstraQueue.Enqueue(DijkstraCostCalc(currentPos, beginPos), currentPos);
-        while (!dijkstraQueue.Empty())
+        ClearPath();
+        if (!isFinding)
         {
-            Vector3 curr = dijkstraQueue.Dequeue();
-            // 跳过的条件
-            if (curr.x >= length || curr.x <= -length ||
-            curr.z >= length || curr.z <= -length ||
-            obstacleList.ContainsKey(curr) ||
-            arriveMap.ContainsKey(curr))
+            isFinding = true;
+            Vector3 beginPos = currentPos;
+            dijkstraQueue.Enqueue(DijkstraCostCalc(currentPos, beginPos), currentPos);
+            while (!dijkstraQueue.Empty())
             {
-                continue;
+                Vector3 curr = dijkstraQueue.Dequeue();
+                // 跳过的条件
+                if (curr.x >= length || curr.x <= -length ||
+                curr.z >= length || curr.z <= -length ||
+                obstacleList.ContainsKey(curr) ||
+                arriveMap.ContainsKey(curr))
+                {
+                    continue;
+                }
+                // 结束的条件
+                if (curr == targetPos)
+                {
+                    dijkstraQueue.Clear();
+                    break;
+                }
+                yield return new WaitForSeconds(initSeconds);
+                GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
+                arriveMap.Add(curr, 1);
+                for (int i = 0; i < offset.Length; i++)
+                {
+                    dijkstraQueue.Size();
+                    Vector3 t = curr + offset[i];
+                    dijkstraQueue.Enqueue(DijkstraCostCalc(t, beginPos), t);
+                }
             }
-            // 结束的条件
-            if (curr == targetPos)
-            {
-                dijkstraQueue.Clear();
-                break;
-            }
-            yield return new WaitForSeconds(initSeconds);
-            GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
-            arriveMap.Add(curr, 1);
-            for (int i = 0; i < offset.Length; i++)
-            {
-                dijkstraQueue.Size();
-                Vector3 t = curr + offset[i];
-                dijkstraQueue.Enqueue(DijkstraCostCalc(t, beginPos), t);
-            }
+            isFinding = false;
         }
-        isFinding = false;
     }
 
 
@@ -226,44 +242,48 @@ public class PathFindAlgorithm : MonoBehaviour
     /// </summary>
     public IEnumerator PathFindAStarFind(Vector3 currentPos, Vector3 targetPos, DistacneClacWay way)
     {
-        isFinding = true;
-        Vector3 beginPos = currentPos; 
-        aStarQueue.Enqueue(AStarCostCalc(currentPos, beginPos, targetPos), currentPos);
-        while (!aStarQueue.Empty())
+        ClearPath();
+        if (!isFinding)
         {
-            Vector3 curr = aStarQueue.Dequeue();
-            // 跳过的条件
-            if (curr.x >= length || curr.x <= -length ||
-            curr.z >= length || curr.z <= -length ||
-            obstacleList.ContainsKey(curr) ||
-            arriveMap.ContainsKey(curr))
+            isFinding = true;
+            Vector3 beginPos = currentPos;
+            aStarQueue.Enqueue(AStarCostCalc(currentPos, beginPos, targetPos), currentPos);
+            while (!aStarQueue.Empty())
             {
-                continue;
+                Vector3 curr = aStarQueue.Dequeue();
+                // 跳过的条件
+                if (curr.x >= length || curr.x <= -length ||
+                curr.z >= length || curr.z <= -length ||
+                obstacleList.ContainsKey(curr) ||
+                arriveMap.ContainsKey(curr))
+                {
+                    continue;
+                }
+                // 结束的条件
+                if (curr == targetPos)
+                {
+                    aStarQueue.Clear();
+                    break;
+                }
+                yield return new WaitForSeconds(initSeconds);
+                GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
+                arriveMap.Add(curr, 1);
+                for (int i = 0; i < offset.Length; i++)
+                {
+                    aStarQueue.Size();
+                    Vector3 t = curr + offset[i];
+                    aStarQueue.Enqueue(AStarCostCalc(t, beginPos, targetPos), t);
+                }
             }
-            // 结束的条件
-            if (curr == targetPos)
-            {
-                aStarQueue.Clear();
-                break;
-            }
-            yield return new WaitForSeconds(initSeconds);
-            GameObject.Instantiate(pathObj, curr, Quaternion.identity, pathParents.transform);
-            arriveMap.Add(curr, 1);
-            for (int i = 0; i < offset.Length; i++)
-            {
-                aStarQueue.Size();
-                Vector3 t = curr + offset[i];
-                aStarQueue.Enqueue(AStarCostCalc(t, beginPos, targetPos), t);
-            }
+            isFinding = false;
         }
-        isFinding = false;
     }
 
 
     /// <summary>
     ///  清空路径的算法
     /// </summary>
-    public void ClearPath()
+    private void ClearPath()
     {
 
         if(!isFinding)
@@ -316,6 +336,6 @@ public class PathFindAlgorithm : MonoBehaviour
         float manhattn = Mathf.Abs(curr.x - begin.x) + Mathf.Abs(curr.y - begin.y) + Mathf.Abs(curr.z - begin.z);
         float euler = Vector3.Distance(curr, target);
 
-        return 0.5f * manhattn + 0.5f * euler;
+        return 0.3f * manhattn + 0.7f * euler;
     }
 }

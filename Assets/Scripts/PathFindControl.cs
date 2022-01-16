@@ -18,7 +18,6 @@ public class PathFindControl : MonoBehaviour
     private Button greedyBestBegin;
     private Button dijkstraBegin;
     private Button aStarBegin;
-    private Button clearPath;
     private Dropdown calcDisWay;
 
 
@@ -56,9 +55,6 @@ public class PathFindControl : MonoBehaviour
         aStarBegin = GameObject.Find("Canvas/AStarSearch").GetComponent<Button>();
         aStarBegin.onClick.AddListener(PathFindWithAStarFirst);
 
-
-        clearPath = GameObject.Find("Canvas/ClearPath").GetComponent<Button>();
-        clearPath.onClick.AddListener(ClearPath);
 
         calcDisWay = GameObject.Find("Canvas/CalcDisWay").GetComponent<Dropdown>();
     }
@@ -103,15 +99,6 @@ public class PathFindControl : MonoBehaviour
         Vector3 pos = new Vector3((int)playerObj.transform.position.x, 0.5f, (int)playerObj.transform.position.z);
         StartCoroutine(PathFindAlgorithm.Instance.PathFindAStarFind(pos, 
             currentTarget.transform.position, GetCalcWay()));
-    }
-
-
-    /// <summary>
-    ///  Çå¿ÕÂ·¾¶
-    /// </summary>
-    private void ClearPath()
-    {
-        PathFindAlgorithm.Instance.ClearPath();
     }
 
 
